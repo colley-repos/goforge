@@ -82,3 +82,29 @@ func SaveManifest(path string, m *AssetManifest) error {
 	}
 	return nil
 }
+
+// ByTag returns all manifest entries that have the given tag.
+func (m *AssetManifest) ByTag(tag string) []ManifestEntry {
+	var results []ManifestEntry
+	for _, entry := range m.Assets {
+		for _, t := range entry.Tags {
+			if t == tag {
+				results = append(results, entry)
+				break
+			}
+		}
+	}
+	return results
+}
+
+// ByRole returns all assessed manifest entries with the given role.
+// Entries without an assessment are skipped.
+func (m *AssetManifest) ByRole(role string) []ManifestEntry {
+	var results []ManifestEntry
+	for _, entry := range m.Assets {
+		if entry.Assessment != nil && entry.Assessment.Role == role {
+			results = append(results, entry)
+		}
+	}
+	return results
+}

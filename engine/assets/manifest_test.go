@@ -83,3 +83,73 @@ func TestManifest_Empty(t *testing.T) {
 		t.Errorf("new manifest should be empty, got %d entries", len(m.Assets))
 	}
 }
+
+func newTestManifest() *AssetManifest {
+	return &AssetManifest{
+		Assets: map[string]ManifestEntry{
+			"house-01": {
+				Path: "meshes/house.glb", Format: FormatGLB,
+				Tags: []string{"building", "synty"},
+				Assessment: &AssetAssessment{Role: "full_cover"},
+			},
+			"crate-01": {
+				Path: "meshes/crate.glb", Format: FormatGLB,
+				Tags: []string{"cover", "synty"},
+				Assessment: &AssetAssessment{Role: "half_cover"},
+			},
+			"tree-01": {
+				Path: "meshes/tree.glb", Format: FormatGLB,
+				Tags: []string{"prop", "nature"},
+				Assessment: &AssetAssessment{Role: "prop"},
+			},
+			"unassessed": {
+				Path: "meshes/mystery.glb", Format: FormatGLB,
+				Tags: []string{"synty"},
+			},
+		},
+	}
+}
+
+func TestManifest_ByTag(t *testing.T) {
+	m := newTestManifest()
+
+	tests := []struct {
+		tag  string
+		want int
+	}{
+		{"synty", 3},
+		{"building", 1},
+		{"nature", 1},
+		{"nonexistent", 0},
+	}
+	for _, tt := range tests {
+		t.Run(tt.tag, func(t *testing.T) {
+			got := m.ByTag(tt.tag)
+			if len(got) != tt.want {
+				t.Errorf("ByTag(%q) returned %d entries, want %d", tt.tag, len(got), tt.want)
+			}
+		})
+	}
+}
+
+func TestManifest_ByRole(t *testing.T) {
+	m := newTestManifest()
+
+	tests := []struct {
+		role string
+		want int
+	}{
+		{"full_cover", 1},
+		{"half_cover", 1},
+		{"prop", 1},
+		{"nonexistent", 0},
+	}
+	for _, tt := range tests {
+		t.Run(tt.role, func(t *testing.T) {
+			got := m.ByRole(tt.role)
+			if len(got) != tt.want {
+				t.Errorf("ByRole(%q) returned %d entries, want %d", tt.role, len(got), tt.want)
+			}
+		})
+	}
+}
