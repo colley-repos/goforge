@@ -20,13 +20,13 @@ func NewTurnBased(factions []int) *TurnBased {
 	}
 }
 
-func (tb *TurnBased) Phase() Phase           { return tb.phase }
-func (tb *TurnBased) ShouldCollect() bool     { return tb.phase == PhaseCollecting }
-func (tb *TurnBased) ShouldResolve() bool     { return tb.pendingResolve }
-func (tb *TurnBased) CurrentFaction() int      { return tb.factions[tb.currentIndex] }
-func (tb *TurnBased) TurnNumber() int          { return tb.turnNumber }
-func (tb *TurnBased) SetPhase(phase Phase)    { tb.phase = phase }
-func (tb *TurnBased) RequestPause()           {} // no-op in turn-based
+func (tb *TurnBased) Phase() Phase         { return tb.phase }
+func (tb *TurnBased) ShouldCollect() bool  { return tb.phase == PhaseCollecting }
+func (tb *TurnBased) ShouldResolve() bool  { return tb.pendingResolve }
+func (tb *TurnBased) CurrentFaction() int  { return tb.factions[tb.currentIndex] }
+func (tb *TurnBased) TurnNumber() int      { return tb.turnNumber }
+func (tb *TurnBased) SetPhase(phase Phase) { tb.phase = phase }
+func (tb *TurnBased) RequestPause()        {} // no-op in turn-based
 
 func (tb *TurnBased) RequestEndTurn() {
 	if tb.phase == PhaseCollecting {

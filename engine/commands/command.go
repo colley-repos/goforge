@@ -13,13 +13,13 @@ import (
 type Type int
 
 const (
-	TypeMove     Type = iota // Move entity to a target position
-	TypeAttack               // Attack a target entity
-	TypeWait                 // Skip / end turn without acting
-	TypeAbility              // Use a special ability
-	TypeOverwatch            // Enter overwatch stance
-	TypeInteract             // Interact with environment
-	TypeCustom               // Game-specific extension point
+	TypeMove      Type = iota // Move entity to a target position
+	TypeAttack                // Attack a target entity
+	TypeWait                  // Skip / end turn without acting
+	TypeAbility               // Use a special ability
+	TypeOverwatch             // Enter overwatch stance
+	TypeInteract              // Interact with environment
+	TypeCustom                // Game-specific extension point
 )
 
 // String returns the command type name.

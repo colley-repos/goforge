@@ -5,8 +5,8 @@ import "testing"
 func TestMapperBindAndProcess(t *testing.T) {
 	m := NewMapper()
 	m.Bind("keyboard", 87, ActionMoveUp)   // W
-	m.Bind("keyboard", 83, ActionMoveDown)  // S
-	m.Bind("keyboard", 32, ActionConfirm)   // Space
+	m.Bind("keyboard", 83, ActionMoveDown) // S
+	m.Bind("keyboard", 32, ActionConfirm)  // Space
 
 	m.BeginFrame()
 

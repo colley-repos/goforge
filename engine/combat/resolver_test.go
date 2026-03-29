@@ -92,7 +92,7 @@ func TestDefaultResolverModifiers(t *testing.T) {
 	attacker := Stats{Accuracy: 50, Damage: 5}
 	target := Stats{Dodge: 10}
 	mods := Modifiers{
-		ExtraBonus:  15,
+		ExtraBonus:   15,
 		ExtraPenalty: 5,
 	}
 

@@ -4,10 +4,10 @@ package pacing
 // Commands are collected continuously but only resolve when unpaused.
 // Auto-pause can be triggered on configurable events.
 type RTwP struct {
-	phase    Phase
-	paused   bool
-	tickCount  int
-	turnNumber int
+	phase        Phase
+	paused       bool
+	tickCount    int
+	turnNumber   int
 	ticksPerTurn int
 }
 
@@ -20,11 +20,11 @@ func NewRTwP(ticksPerTurn int) *RTwP {
 	}
 }
 
-func (r *RTwP) Phase() Phase        { return r.phase }
+func (r *RTwP) Phase() Phase         { return r.phase }
 func (r *RTwP) ShouldCollect() bool  { return r.phase == PhaseCollecting }
 func (r *RTwP) ShouldResolve() bool  { return r.phase == PhaseCollecting && !r.paused }
-func (r *RTwP) CurrentFaction() int   { return -1 }
-func (r *RTwP) TurnNumber() int       { return r.turnNumber }
+func (r *RTwP) CurrentFaction() int  { return -1 }
+func (r *RTwP) TurnNumber() int      { return r.turnNumber }
 func (r *RTwP) SetPhase(phase Phase) { r.phase = phase }
 func (r *RTwP) RequestEndTurn()      {} // no-op
 

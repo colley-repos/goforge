@@ -16,7 +16,7 @@ const (
 // Cell holds data for a single grid tile.
 type Cell struct {
 	Walkable bool
-	Occupant uint64     // entity ID, 0 = empty
+	Occupant uint64 // entity ID, 0 = empty
 	Cover    CoverLevel
 }
 

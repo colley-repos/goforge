@@ -11,12 +11,12 @@ import (
 
 // Stats holds combat-relevant attributes for an entity.
 type Stats struct {
-	Accuracy     int // base hit chance (0-100)
-	Dodge        int // evasion chance (0-100)
-	Damage       int // base damage per hit
-	AttackRange  int // max attack range in grid/world units
-	Armor        int // flat damage reduction
-	CritChance   int // critical hit chance (0-100)
+	Accuracy     int     // base hit chance (0-100)
+	Dodge        int     // evasion chance (0-100)
+	Damage       int     // base damage per hit
+	AttackRange  int     // max attack range in grid/world units
+	Armor        int     // flat damage reduction
+	CritChance   int     // critical hit chance (0-100)
 	CritMultiply float64 // critical damage multiplier (e.g., 1.5)
 }
 
@@ -32,15 +32,15 @@ type Modifiers struct {
 
 // Result is the auditable outcome of a combat resolution.
 type Result struct {
-	Hit          bool
-	Critical     bool
-	Damage       int
-	HitChance    int // calculated hit chance (clamped)
-	RawHitChance int // hit chance before clamping
-	Roll         int // the random roll (1-100)
+	Hit           bool
+	Critical      bool
+	Damage        int
+	HitChance     int // calculated hit chance (clamped)
+	RawHitChance  int // hit chance before clamping
+	Roll          int // the random roll (1-100)
 	AttackerStats Stats
 	TargetStats   Stats
-	Modifiers    Modifiers
+	Modifiers     Modifiers
 }
 
 // Resolver computes a combat outcome.
@@ -56,10 +56,10 @@ type Resolver interface {
 //	roll 1-100; hit if roll <= hitChance
 //	damage = baseDamage - armor + damageBonus, multiplied by damageMult and critMult
 type DefaultResolver struct {
-	MinHitChance     int // default: 5
-	MaxHitChance     int // default: 95
-	DistancePenalty  int // per-unit distance penalty, default: 3
-	RNG              *rand.Rand
+	MinHitChance    int // default: 5
+	MaxHitChance    int // default: 95
+	DistancePenalty int // per-unit distance penalty, default: 3
+	RNG             *rand.Rand
 }
 
 // NewDefaultResolver creates a resolver with sane defaults.
@@ -90,13 +90,13 @@ func (r *DefaultResolver) Resolve(attacker, target Stats, mods Modifiers, distan
 	hit := roll <= hitChance
 
 	result := Result{
-		Hit:          hit,
-		HitChance:    hitChance,
-		RawHitChance: rawHitChance,
-		Roll:         roll,
+		Hit:           hit,
+		HitChance:     hitChance,
+		RawHitChance:  rawHitChance,
+		Roll:          roll,
 		AttackerStats: attacker,
 		TargetStats:   target,
-		Modifiers:    mods,
+		Modifiers:     mods,
 	}
 
 	if hit {

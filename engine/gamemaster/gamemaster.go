@@ -7,8 +7,8 @@ package gamemaster
 
 import (
 	"github.com/colley-repos/goforge/engine/commands"
-	"github.com/colley-repos/goforge/engine/events"
 	ecslib "github.com/colley-repos/goforge/engine/ecs"
+	"github.com/colley-repos/goforge/engine/events"
 	"github.com/colley-repos/goforge/engine/input"
 	"github.com/colley-repos/goforge/engine/pacing"
 )

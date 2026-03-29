@@ -115,6 +115,27 @@ code is unfinished code.
 | `state`        | Snapshot round-trip, undo LIFO, save/load file I/O     |
 | `config`       | Load, save, defaults creation, missing file handling   |
 
+## Cross-Project Learning
+
+GoForge is the genre-agnostic bootstrap. Any reusable lesson discovered in
+downstream projects (e.g. Dystopia) that is NOT game-specific should be
+propagated back here. Examples:
+
+- Asset pipeline discoveries (e.g. "never trust filenames, visually assess")
+- Testing patterns (e.g. "headless tests need Engine.time_scale for tweens")
+- Rendering gotchas (e.g. "Godot 4 tonemap enums aren't accessible by name")
+- Tool usage patterns, performance findings, build issues
+
+If a lesson is project-specific (specific map layout, specific game balance),
+keep it in that project. If it's transferable, update GoForge docs or roadmap.
+
+### Accumulated Learnings (from downstream projects)
+
+- `docs/GODOT_GOTCHAS.md` — 16 GDScript and Godot 4 engine pitfalls
+- `docs/ARCHITECTURE_PATTERNS.md` — 7 proven game architecture patterns
+- `docs/BUILD_TEST_PATTERNS.md` — Build, test, and debugging workflows
+- `docs/ASSET_PIPELINE.md` — Asset assessment, animation pipeline, skeletal vs static
+
 ## Git
 
 - `go.work` is gitignored (developer-local)

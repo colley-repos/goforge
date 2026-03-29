@@ -3,9 +3,9 @@ package pacing
 // RealTime implements Controller for real-time games.
 // Commands are always being collected and resolved immediately.
 type RealTime struct {
-	phase      Phase
-	tickCount  int
-	turnNumber int // increments every N ticks (for UI display)
+	phase        Phase
+	tickCount    int
+	turnNumber   int // increments every N ticks (for UI display)
 	ticksPerTurn int
 }
 
@@ -19,14 +19,14 @@ func NewRealTime(ticksPerTurn int) *RealTime {
 	}
 }
 
-func (rt *RealTime) Phase() Phase           { return rt.phase }
-func (rt *RealTime) ShouldCollect() bool     { return rt.phase == PhaseCollecting }
-func (rt *RealTime) ShouldResolve() bool     { return rt.phase == PhaseCollecting } // always resolve
-func (rt *RealTime) CurrentFaction() int      { return -1 }                          // all factions act simultaneously
-func (rt *RealTime) TurnNumber() int          { return rt.turnNumber }
-func (rt *RealTime) SetPhase(phase Phase)    { rt.phase = phase }
-func (rt *RealTime) RequestEndTurn()         {}                                      // no-op in real-time
-func (rt *RealTime) RequestPause()           {}                                      // no-op (use RTwP for pause)
+func (rt *RealTime) Phase() Phase         { return rt.phase }
+func (rt *RealTime) ShouldCollect() bool  { return rt.phase == PhaseCollecting }
+func (rt *RealTime) ShouldResolve() bool  { return rt.phase == PhaseCollecting } // always resolve
+func (rt *RealTime) CurrentFaction() int  { return -1 }                          // all factions act simultaneously
+func (rt *RealTime) TurnNumber() int      { return rt.turnNumber }
+func (rt *RealTime) SetPhase(phase Phase) { rt.phase = phase }
+func (rt *RealTime) RequestEndTurn()      {} // no-op in real-time
+func (rt *RealTime) RequestPause()        {} // no-op (use RTwP for pause)
 
 func (rt *RealTime) Advance() {
 	if rt.phase != PhaseCollecting {
