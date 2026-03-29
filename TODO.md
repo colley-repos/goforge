@@ -13,11 +13,11 @@ renderer interface. All with mandatory unit tests.
 Implement the asset system documented in `docs/ASSET_PIPELINE.md`.
 
 ### P1.1 — AssetProvider Interface & Manager
-- [ ] `AssetProvider` interface: `Fetch(id, format) -> ([]byte, error)`
-- [ ] `AssetManager` — wraps provider, routes requests, tracks loaded assets
-- [ ] `AssetHandle` — lightweight reference returned to callers, ref-counted
-- [ ] `AssetManifest` — data-driven registry mapping IDs to paths, variants, tags, LOD levels
-- [ ] Variant metadata: each manifest entry supports multiple material/palette variants per mesh
+- [x] `AssetProvider` interface: `Fetch(id, format) -> ([]byte, error)`
+- [x] `AssetManager` — wraps provider, routes requests, tracks loaded assets
+- [x] `AssetHandle` — lightweight reference returned to callers, ref-counted
+- [x] `AssetManifest` — data-driven registry mapping IDs to paths, variants, tags, LOD levels
+- [x] Variant metadata: each manifest entry supports multiple material/palette variants per mesh
 
 ### P1.2 — Local Filesystem Provider
 - [ ] Read PNG (2D) and GLB (3D) from configured directory
