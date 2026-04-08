@@ -2,6 +2,41 @@
 
 ## Phase 0 — Engine Foundation ✅
 
+## Phase 0.5 — GameMode Framework ✅ (partial)
+
+The GameMode framework is the spine every downstream project needs before
+anything else. Without it, every project rebuilds the same wiring from scratch.
+Inspired by Unreal Engine's GameMode / GameState / PlayerController / HUD architecture.
+
+### Go Engine
+- [x] `GameMode` interface in `engine/gamemaster/game_mode.go`
+- [x] `BaseGameMode` — no-op embed for partial overrides
+- [x] `GameMaster.Config.Mode` — accepted at construction, `OnMatchStart` called after init
+- [x] `DefaultSystems()` — mode-owned systems registered before game-specific ones
+- [x] `SpawnConfig` — spawn position, team, facing for player join/respawn
+
+### Godot Scaffold Template (`scaffold/templates/godot-mobile/`)
+- [x] `scripts/framework/game_mode.gd` — base class with slot exports + lifecycle hooks
+- [x] `scripts/framework/player_controller.gd` — possess/unpossess pattern
+- [x] `scripts/framework/game_state.gd` — shared match truth, phase counter, timer
+- [x] `scripts/framework/player_state.gd` — per-player data, death tracking
+- [x] `scripts/framework/hud_base.gd` — modal stack, toast, pause signal
+- [x] `scripts/autoloads/sfx_manager.gd` — preload-on-ready, play-by-name, group lookup
+- [x] `scripts/autoloads/game_manager.gd` — session-level bookkeeping
+- [x] `scripts/units/unit_base_3d.gd` — state machine, HP, animation, signals
+- [x] `scripts/vfx/vfx_helper.gd` — static factory: ring, bolt, light flash, overhead icon
+- [x] `scripts/test/test_scene_base.gd` — isolated subsystem test harness pattern
+- [x] `CLAUDE.md` — project template with Critical Findings section
+- [ ] `project.godot` — pre-configured: ETC2/ASTC enabled, autoloads wired, Android export preset
+- [ ] Main scene stub that roots a concrete GameMode
+
+### Docs
+- [x] `docs/ARCHITECTURE_PATTERNS.md` — patterns 8-11: GameMode, Director, State Machine, Combat/AI Separation
+- [x] `docs/GODOT_GOTCHAS.md` — entries 17-23: material_override, button borders, modal sizing, OBJ import, init order, dead code, SFX preloading
+
+---
+
+
 Core systems: ECS, events, commands, pacing (turn-based/realtime/RTwP), input
 mapper, spatial grid, combat resolver, AI brains, state manager, config loader,
 renderer interface. All with mandatory unit tests.

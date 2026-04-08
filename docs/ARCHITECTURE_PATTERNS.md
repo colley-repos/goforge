@@ -245,6 +245,143 @@ audio in a shipped product (unless that's your aesthetic).
 
 ---
 
+---
+
+## 8. GameMode / Framework Pattern (Unreal-Inspired)
+
+**Problem:** Every new game project rebuilds the same wiring: who spawns the
+player, who owns the HUD, who tracks score, how does match start and end?
+The first weeks of a project are spent on plumbing, not gameplay.
+
+**Solution:** A `GameMode` class that declares the *slots* a game type needs
+and fills them. Swap the GameMode → swap the entire game type. Same engine,
+completely different rules.
+
+```
+GameMode (root scene / orchestrator)
+  ├── PlayerController  ← input → actions (no input code in units or HUD)
+  ├── HUD               ← UI overlay, reads state, never mutates it
+  ├── GameState         ← shared truth (phase, timer, score, entity lists)
+  └── PlayerState       ← per-player data (gold, XP, loadout, deaths)
+```
+
+Key insight: **the unit doesn't handle input. The controller does.**
+This is the same reason Unreal separates PlayerController from Pawn — it
+lets you possess any pawn, drive it from AI instead of a player, or
+spectate without changing the pawn at all.
+
+**In GDScript:**
+
+```gdscript
+class_name MyGameMode extends GameMode
+
+func match_start() -> void:
+    game_state.spawn_enemies(wave_data)
+    hud.show_encounter_ui()
+
+func match_end(winner: String) -> void:
+    hud.show_result_modal(winner)
+```
+
+**Benefits:**
+- New game type = new GameMode subclass, nothing else changes
+- Every project starts with HUD, state, and controller wired correctly
+- Testing: swap in a TestGameMode with no HUD, reduced enemy count, keyboard cheats
+
+---
+
+## 9. Director / Encounter Phase Pattern
+
+**Problem:** A boss encounter or wave system has complex timing: abilities
+fire on cooldowns, phases trigger at HP thresholds, multiple subsystems
+need to coordinate without knowing about each other.
+
+**Solution:** A `Director` singleton (autoload) that owns the encounter
+state machine. Units have AI for *local* decisions (movement, targeting).
+The Director makes *global* decisions (when to start phase 2, which hero
+to taunt, when to call reinforcements). They communicate via signals only.
+
+```
+Director (autoload singleton)
+  ├── Phase state machine (phase_1, phase_2, enrage)
+  ├── Ability cooldown timers
+  ├── Global targeting rules ("taunt the tank", "slam the cluster")
+  └── Signals: ability_fired, phase_changed, encounter_ended
+
+Unit AI (attached to each unit)
+  ├── Local decisions: move to target, play attack animation
+  ├── Responds to: Director.ability_fired → react to AoE
+  └── Never calls Director directly
+```
+
+**Key rules:**
+- Director → units via signals. Units never call Director.
+- Director knows *what* to do and *when*. Unit AI knows *how* to move.
+- Combat math (damage, hit chance) lives in a separate pure resolver.
+
+**Pacing:** Director runs ability cooldowns on `_process()`. When a
+cooldown expires, Director picks a target using global knowledge (who
+has least HP, who is in a cluster), fires the ability signal, and
+resets the timer. No unit needs to know this logic exists.
+
+---
+
+## 10. Unit State Machine Pattern
+
+**Problem:** Units accumulate boolean flags (`is_attacking`, `is_moving`,
+`is_stunned`, `is_dead`) that interact in undocumented ways. "Why isn't
+the unit moving?" requires checking 6 booleans.
+
+**Solution:** A single typed enum state. One state at a time. Explicit
+transitions with an `_on_state_changed()` hook.
+
+```gdscript
+enum State { IDLE, MOVING, FIGHTING, WAITING, DEAD }
+
+var current_state: State = State.IDLE
+
+func _process(delta: float) -> void:
+    match current_state:
+        State.IDLE:     _process_idle(delta)
+        State.MOVING:   _process_moving(delta)
+        State.FIGHTING: _process_fighting(delta)
+        State.WAITING:  pass  # gate condition, do nothing
+        State.DEAD:     pass  # no processing
+
+func set_state(new_state: State) -> void:
+    if new_state == current_state:
+        return
+    var old := current_state
+    current_state = new_state
+    _on_state_changed(old, new_state)
+```
+
+**`WAITING` state:** Any time an external system needs to pause a unit
+(phase gate, spawn lock, cutscene), call `unit.set_state(State.WAITING)`.
+The unit stops processing, plays an idle animation, and resumes when the
+gate clears. Never add a boolean for this.
+
+---
+
+## 11. Combat / AI Separation
+
+**Problem:** Combat logic (damage calc, cooldowns, ability selection)
+bleeds into unit AI scripts. Changing an ability requires touching every
+unit that uses it.
+
+**Solution:** Two distinct responsibilities, never mixed:
+
+| Layer | Owns | Example |
+|-------|------|---------|
+| `CombatDirector` (autoload) | encounter rules, ability timing, global targeting | "fire cleave at the three clustered heroes" |
+| `UnitAI` (per-unit node) | local movement, animation, reaction to combat events | "move toward target, play attack anim" |
+| `CombatResolver` (static) | pure math — damage, hit chance, crit | `CombatResolver.calculate_damage(atk, def)` |
+
+Units never call the Director. Director signals units. Resolver is called
+by whoever needs a number — Director, units, or UI.
+
+---
+
 ## General Principles
 
 1. **Separate data from behavior.** Content (stats, definitions, tables) lives

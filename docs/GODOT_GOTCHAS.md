@@ -205,3 +205,132 @@ still execute in the correct order relative to entity spawning.
 
 `--headless --script` mode requires the script to be a MainLoop/SceneTree
 class, not a regular Node. Do NOT use it to validate individual scripts.
+
+---
+
+## UI & Nodes
+
+### 17. `material_override` vs `surface_set_material`
+
+When assigning a material to a procedural mesh created at runtime:
+
+```gdscript
+# BAD — surface_set_material on the mesh resource silently does nothing
+# when the mesh is created in code (material is applied before scene attachment)
+var bm: BoxMesh = BoxMesh.new()
+bm.surface_set_material(0, mat)
+mi.mesh = bm
+
+# GOOD — material_override on the MeshInstance3D always works
+var bm: BoxMesh = BoxMesh.new()
+mi.mesh = bm
+mi.material_override = mat  # applied after mesh is set, works correctly
+```
+
+`surface_set_material` works reliably on meshes loaded from files (.obj, .glb).
+For any mesh you create in code, use `material_override` on the MeshInstance3D.
+
+### 18. Removing Button State Borders (Focus / Click / Hover)
+
+Buttons show white/colored borders on focus, hover, and press by default.
+To remove them completely, you must override ALL four StyleBox theme slots:
+
+```gdscript
+var empty := StyleBoxEmpty.new()
+button.add_theme_stylebox_override("normal", empty)
+button.add_theme_stylebox_override("hover", empty)
+button.add_theme_stylebox_override("pressed", empty)
+button.add_theme_stylebox_override("focus", empty)
+```
+
+Missing even one slot leaves a visible border in that state.
+
+### 19. Modal Sizing with `call_deferred`
+
+Setting `size` or `position` on a Control node inside `_ready()` is ignored —
+the container layout hasn't resolved yet.
+
+```gdscript
+# BAD — size is overridden by container layout, ignored
+func _ready() -> void:
+    my_panel.size = Vector2(600, 800)
+
+# GOOD — deferred so it runs after layout resolves
+func _ready() -> void:
+    call_deferred("_apply_size")
+
+func _apply_size() -> void:
+    my_panel.size = Vector2(600, 800)
+    my_panel.position = (get_viewport_rect().size - my_panel.size) * 0.5
+```
+
+### 20. OBJ Import Requires Texture File Alongside
+
+When importing a `.obj` model that references a texture, Godot's importer
+requires the texture file to exist in the **same directory** as the OBJ+MTL:
+
+```
+assets/models/vfx/
+  shield_B.obj
+  shield_B.mtl          ← required
+  weapons_bits_texture.png  ← must be here, name must match MTL reference
+```
+
+Missing or misnamed texture = model imports but appears white/invisible.
+
+---
+
+## Architecture
+
+### 21. Initialization Order: Phase Before HUD
+
+Any system that reads a phase flag or game mode to build its layout MUST
+receive that state BEFORE it is instantiated and added to the scene.
+
+```gdscript
+# BAD — HUD reads current_phase in _ready(), but phase isn't set yet
+instantiate_hud()
+current_phase = BOSS_PHASE
+
+# GOOD
+current_phase = BOSS_PHASE
+instantiate_hud()  # _ready() now sees the correct phase
+```
+
+This applies to any GameMode-driven initialization — set all state first,
+spawn children second.
+
+### 22. Verify Dead Code Is Actually Dead Before Refactoring
+
+Before removing a function or flag, verify it is actually unreachable. A
+variable that is *declared* and *read* but never *set to true/non-default*
+is silently dead — it compiles cleanly, all reads return the default value,
+and the feature simply never activates.
+
+**Rule:** Before deleting any flag or function during cleanup, grep for all
+write sites, not just read sites. If there are zero non-default writes, the
+feature was never wired up — document why before removing it.
+
+### 23. SFX: Preload on Ready, Never at Play Time
+
+Loading audio resources on-demand (`load("res://sfx/hit.ogg")`) causes
+frame hitches, especially on mobile. Preload all sounds in `_ready()` and
+keep `AudioStreamPlayer` nodes alive for the session.
+
+```gdscript
+# BAD — hitch on every first play
+func play_hit() -> void:
+    var stream = load("res://assets/sfx/hit.ogg")
+    $Player.stream = stream
+    $Player.play()
+
+# GOOD — loaded once, instant play
+func _ready() -> void:
+    $HitPlayer.stream = preload("res://assets/sfx/hit.ogg")
+
+func play_hit() -> void:
+    $HitPlayer.play()
+```
+
+See `SFXManager` in the GoForge scaffold for the production-ready pattern
+(dictionary of named players, preloaded in `_ready()`).

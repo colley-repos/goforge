@@ -46,9 +46,15 @@ type Config struct {
 	Pacing      pacing.Controller
 	Resolver    commands.Resolver
 	InputMapper *input.Mapper
+	// Mode defines the game type: rules, spawn logic, lifecycle hooks.
+	// If nil, no match lifecycle is triggered. Provide a concrete GameMode
+	// (or embed BaseGameMode) for any real game.
+	Mode GameMode
 }
 
 // New creates a new GameMaster with the given configuration.
+// If cfg.Mode is provided, its DefaultSystems() are registered first,
+// followed by OnMatchStart() once the GameMaster is fully wired.
 func New(cfg Config) *GameMaster {
 	world := ecslib.NewWorld()
 
@@ -64,6 +70,13 @@ func New(cfg Config) *GameMaster {
 
 	if gm.InputMapper == nil {
 		gm.InputMapper = input.NewMapper()
+	}
+
+	if cfg.Mode != nil {
+		for _, sys := range cfg.Mode.DefaultSystems() {
+			gm.AddSystem(sys)
+		}
+		cfg.Mode.OnMatchStart(gm)
 	}
 
 	return gm

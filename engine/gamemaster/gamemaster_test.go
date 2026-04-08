@@ -79,6 +79,51 @@ func TestGameMasterRealTimeResolves(t *testing.T) {
 	}
 }
 
+func TestGameModeOnMatchStartCalled(t *testing.T) {
+	var startCalled bool
+	gm := New(Config{
+		Pacing: pacing.NewRealTime(0),
+		Mode:   &matchStartRecorder{called: &startCalled},
+	})
+
+	if !startCalled {
+		t.Fatal("GameMode.OnMatchStart should have been called by New()")
+	}
+	if gm == nil {
+		t.Fatal("GameMaster should not be nil")
+	}
+}
+
+// matchStartRecorder is a test GameMode that records when OnMatchStart fires.
+type matchStartRecorder struct {
+	BaseGameMode
+	called *bool
+}
+
+func (r *matchStartRecorder) OnMatchStart(_ *GameMaster) { *r.called = true }
+
+func TestGameModeDefaultSystemsRegistered(t *testing.T) {
+	systemCalled := false
+	mode := &systemsMode{system: func(_ *TickContext) { systemCalled = true }}
+
+	gm := New(Config{
+		Pacing: pacing.NewRealTime(0),
+		Mode:   mode,
+	})
+	gm.Tick(0.016)
+
+	if !systemCalled {
+		t.Fatal("DefaultSystems() system should have been called on first tick")
+	}
+}
+
+type systemsMode struct {
+	BaseGameMode
+	system System
+}
+
+func (m *systemsMode) DefaultSystems() []System { return []System{m.system} }
+
 func TestGameMasterTickCount(t *testing.T) {
 	gm := New(Config{
 		Pacing: pacing.NewRealTime(0),
